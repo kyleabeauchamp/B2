@@ -1,6 +1,6 @@
 # B2: better benchmarking
 
-1.  Install requirements (not 100% working yet, possible issues with packmol gfort and openmm etc.)
+1.  Install requirements (not 100% working yet, possible issues with packmol gfort and openmm etc.)  Needs py3k FYI.
 
 ```bash
 conda env create -f environment.yml
