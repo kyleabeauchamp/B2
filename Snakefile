@@ -1,8 +1,11 @@
 import pandas as pd
-from density_simulation_parameters import DATA_PATH, MOLECULES_PER_BOX
+from density_simulation_parameters import MOLECULES_PER_BOX
 
 # You should have already run count_classes.py to generate this file, which lists the experiments to run.
-EXPERIMENTS = pd.read_csv("./inputs/data_dielectric.csv")
+FULLDATA_CSV = "inputs/full_filtered_data.csv",
+INPUT_DIELECTRIC = "inputs/data_dielectric.csv"
+
+EXPERIMENTS = pd.read_csv(INPUT_DIELECTRIC)
 EXPERIMENTS["IDENTIFIER"] = EXPERIMENTS["cas"] + "_" + EXPERIMENTS["Temperature, K"].astype('str')
 EXPERIMENTS = EXPERIMENTS.set_index("IDENTIFIER")
 EXPERIMENTS["MOLECULES"] = MOLECULES_PER_BOX
@@ -17,13 +20,13 @@ rule all:
         equil_dcd = expand("results/equil/{identifier}.dcd", identifier=IDENTIFIERS),
         production_dcd = expand("results/production/{identifier}.dcd", identifier=IDENTIFIERS),
 
-        #si_csv_in = "results/tables/full_filtered_data.csv",
-        #si_csv = "results/tables/data_with_metadata.csv",
+        si_csv = "results/tables/data_with_metadata.csv",
 
-        #latex = "results/tables/functional_groups_latex.txt",
+        latex = "results/tables/functional_groups_latex.txt",
         predictions_csv = expand("results/tables/predictions/{identifier}.csv", identifier=IDENTIFIERS),
         all_predictions_csv = "results/tables/predictions.csv",
 
+        dens_pdf = "results/figures/densities_thermoml.pdf",
 
 rule build_monomer:
     output:
@@ -94,21 +97,17 @@ rule production:
         "--temperature {params.temperature};"
 
 rule build_si_table:
-    input:
-        incsv = "results/tables/full_filtered_data.csv",
     output:
         outcsv = "results/tables/data_with_metadata.csv",
     shell:
-        "code/create_data_table_for_si.py {input.csv} {output.outcsv};"
+        "code/create_data_table_for_si.py {FULLDATA_CSV} {output.outcsv};"
 
 
 rule list_functional_groups:
-    input:
-        incsv = "results/tables/data_dielectric.csv",
     output:
         latex = "results/tables/functional_groups_latex.txt",
     shell:
-        "code/list_functional_groups.py {input.incsv} > {output.latex};"
+        "code/list_functional_groups.py {INPUT_DIELECTRIC} > {output.latex};"
 
 
 rule generate_prediction:
@@ -140,3 +139,22 @@ rule merge_predictions:
     shell:
         "code/munge_output_amber.py merge"
         "--incsv={input.csv} --outcsv={output.csv};"
+
+
+rule plot_tbv:
+    input:
+        pred_csv = "results/tables/predictions.csv",
+        data_with_metadata = "results/tables/data_with_metadata.csv",
+    output:
+        dens_pdf = "results/figures/densities_thermoml.pdf",
+        diff_pdf = "results/figures/densities_differences_thermoml.pdf",
+        diel_pdf = "results/figures/dielectrics_thermoml.pdf",
+        nocorr_pdf = "results/figures/dielectrics_thermoml_nocorr.pdf",
+    shell:
+        "code/plot_tbv.py "
+        "--expt_csv={input.data_with_metadata} "
+        "--pred_csv={input.pred_csv} "
+        "--dens_pdf={output.dens_pdf} "
+        "--diff_pdf={output.diff_pdf} "
+        "--diel_pdf={output.diel_pdf} "
+        "--nocorr_pdf={output.nocorr_pdf} "
