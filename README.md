@@ -26,3 +26,4 @@ snakemake -p
 ```
 
 Cluster mode is also available via, e.g., `snakemake --cluster="qsub ......"`
+The details of the pipeline are the rules in `Snakefile`.
