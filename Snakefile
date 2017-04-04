@@ -1,7 +1,7 @@
 import pandas as pd
 from density_simulation_parameters import MOLECULES_PER_BOX
 
-# You should have already run count_classes.py to generate this file, which lists the experiments to run.
+# I'm assuming you have already generated these two CSV files, which lists the experiments to run.
 FULLDATA_CSV = "inputs/full_filtered_data.csv",
 INPUT_DIELECTRIC = "inputs/data_dielectric.csv"
 
