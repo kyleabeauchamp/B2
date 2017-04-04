@@ -1,0 +1,17 @@
+name: py35
+channels:
+  - conda-forge
+  - bioconda
+  - omnia
+dependencies:
+  - python=3.5
+  - pandas  # TODO: add min. or exact versions!
+  - snakemake
+  - openmm
+  - pymbar
+  - openmoltools
+  - mdtraj
+  - parmed
+  - packmol
+  - pip:
+    - fire
