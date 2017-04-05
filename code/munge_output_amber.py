@@ -47,7 +47,7 @@ def predict(in_prmtop, in_csv, in_dcd, out_csv, cas, temperature):
 def merge(incsv, outcsv):
     print(incsv)
     csv_filenames = incsv.split(",")
-    x = pd.DataFrame([pd.read_csv(filename) for filename in csv_filenames])
+    x = pd.DataFrame({i: pd.read_csv(filename, names=["KEY", "VAL"]).set_index("KEY").VAL for i, filename in enumerate(csv_filenames)}).T
     x.to_csv(outcsv)
 
 

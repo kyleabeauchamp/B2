@@ -23,7 +23,7 @@ rule all:
 
         si_csv = "results/tables/data_with_metadata.csv",
 
-        latex = "results/tables/functional_groups_latex.txt",
+        # latex = "results/tables/functional_groups_latex.txt",  # NB: I haven't tested this yet, no OE installation right now...
         predictions_csv = expand("results/tables/predictions/{identifier}.csv", identifier=IDENTIFIERS),
         all_predictions_csv = "results/tables/predictions.csv",
 

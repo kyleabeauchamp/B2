@@ -10,7 +10,7 @@ import pandas as pd
 import fire
 
 
-def runner(expt_csv, pred_csv, densities_pdf, dielectrics_nocorr_pdf, dielectrics_pdf):
+def runner(expt_csv, pred_csv, dens_pdf, diff_pdf, diel_pdf, nocorr_pdf):
     FIGURE_SIZE = (6.5, 6.5)
     DPI = 1600
 
@@ -54,12 +54,11 @@ def runner(expt_csv, pred_csv, densities_pdf, dielectrics_nocorr_pdf, dielectric
 
     x, y = pred["density"], pred["expt_density"]
     relative_rms = (((x - y) / x)**2).mean() ** 0.5
-    cv = sklearn.cross_validation.Bootstrap(len(x), train_size=len(x) - 1, n_iter=100)
-    relative_rms_grid = np.array([(((x[ind] - y[ind]) / x[ind])**2).mean() ** 0.5 for ind, _ in cv])
-    relative_rms_err = relative_rms_grid.std()
+    # cv = sklearn.cross_validation.Bootstrap(len(x), train_size=len(x) - 1, n_iter=100)
+    # relative_rms_grid = np.array([(((x[ind] - y[ind]) / x[ind])**2).mean() ** 0.5 for ind, _ in cv])
+    # relative_rms_err = relative_rms_grid.std()
     plt.title(r"Density [g cm$^{-3}$]")
-    plt.savefig(densities_pdf, bbox_inches="tight")
-
+    plt.savefig(dens_pdf, bbox_inches="tight")
 
     plt.figure(figsize=FIGURE_SIZE, dpi=DPI)
     for (formula, grp) in pred.groupby("formula"):
@@ -81,12 +80,12 @@ def runner(expt_csv, pred_csv, densities_pdf, dielectrics_nocorr_pdf, dielectric
 
     x, y = pred["density"], pred["expt_density"]
     relative_rms = (((x - y) / x)**2).mean() ** 0.5
-    cv = sklearn.cross_validation.Bootstrap(len(x), train_size=len(x) - 1, n_iter=100)
-    relative_rms_grid = np.array([(((x[ind] - y[ind]) / x[ind]) ** 2).mean() ** 0.5 for ind, _ in cv])
-    relative_rms_err = relative_rms_grid.std()
+    # cv = sklearn.cross_validation.Bootstrap(len(x), train_size=len(x) - 1, n_iter=100)
+    # relative_rms_grid = np.array([(((x[ind] - y[ind]) / x[ind]) ** 2).mean() ** 0.5 for ind, _ in cv])
+    # relative_rms_err = relative_rms_grid.std()
     plt.title(r"Density [g cm$^{-3}$]")
 
-    plt.savefig(density_differences, bbox_inches="tight")
+    plt.savefig(diff_pdf, bbox_inches="tight")
 
 
     yerr = pred["expt_dielectric_std"].replace(np.nan, 0.0)
@@ -121,7 +120,7 @@ def runner(expt_csv, pred_csv, densities_pdf, dielectrics_nocorr_pdf, dielectric
     plt.legend(loc=0)
     plt.gca().set_aspect('equal', adjustable='box')
     plt.draw()
-    plt.savefig(dielectrics_nocorr, bbox_inches="tight")
+    plt.savefig(nocorr_pdf, bbox_inches="tight")
 
 
     x, y = pred["corrected_dielectric"], pred["expt_dielectric"]
@@ -137,7 +136,7 @@ def runner(expt_csv, pred_csv, densities_pdf, dielectrics_nocorr_pdf, dielectric
     plt.legend(loc=0)
     plt.gca().set_aspect('equal', adjustable='box')
     plt.draw()
-    plt.savefig(dielectrics_pdf, bbox_inches="tight")
+    plt.savefig(diel_pdf, bbox_inches="tight")
 
 
 if __name__ == "__main__":
