@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import chemistry
+import parmed
 from openmoltools import cirpy
 import mdtraj as md
 import pymbar
@@ -25,7 +25,7 @@ def predict(in_prmtop, in_csv, in_dcd, out_csv, cas, temperature):
     [t0, g, Neff] = pymbar.timeseries.detectEquilibration(rho)
     mu = rho[t0:].mean()
     sigma = rho[t0:].std() * Neff ** -0.5
-    prmtop = chemistry.load_file(in_prmtop)
+    prmtop = parmed.load_file(in_prmtop)
     charges = prmtop.to_dataframe().charge.values
     temperature = float(temperature)
     traj = traj[t0 * len(traj) / len(rho):]
@@ -44,9 +44,11 @@ def predict(in_prmtop, in_csv, in_dcd, out_csv, cas, temperature):
     data.to_csv(out_csv)
 
 
-def merge(csv_filenames, out_csv):
+def merge(incsv, outcsv):
+    print(incsv)
+    csv_filenames = incsv.split(",")
     x = pd.DataFrame([pd.read_csv(filename) for filename in csv_filenames])
-    x.to_csv(out_csv)
+    x.to_csv(outcsv)
 
 
 if __name__ == "__main__":

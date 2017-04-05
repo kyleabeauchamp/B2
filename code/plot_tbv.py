@@ -7,6 +7,7 @@ import simtk.unit as u
 import polarizability
 import matplotlib.pyplot as plt
 import pandas as pd
+import fire
 
 
 def runner(expt_csv, pred_csv, densities_pdf, dielectrics_nocorr_pdf, dielectrics_pdf):
@@ -137,6 +138,7 @@ def runner(expt_csv, pred_csv, densities_pdf, dielectrics_nocorr_pdf, dielectric
     plt.gca().set_aspect('equal', adjustable='box')
     plt.draw()
     plt.savefig(dielectrics_pdf, bbox_inches="tight")
+
 
 if __name__ == "__main__":
     fire.Fire(runner)

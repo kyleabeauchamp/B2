@@ -12,7 +12,7 @@ elemental_coefficients = {key:val * u.angstrom ** 3 for (key, val) in elemental_
 def polarizability(traj, add_baseline=True):
     """Estimate the polarizabilty of a simulation box using the simple
     elemental regression model (e.g. counting elements) of Sales, 2002.
-    
+
     Returns
     -------
     alpha : simtk.unit, [Angstroms^3]
@@ -40,16 +40,16 @@ def polarizability_from_formula(formula, add_baseline=True):
     Returns
     -------
     alpha : simtk.unit, [Angstroms^3]
-        The polarizability    
+        The polarizability
     """
     element_dict = formula_to_element_counts(formula)
-    
+
     #return([number * elemental_coefficients[e] for e, number in element_dict.items()])
     alpha = np.sum([number * elemental_coefficients[e] for e, number in element_dict.items()])
 
     if add_baseline:
         alpha += baseline
-    
+
     return alpha
 
 def dielectric_correction_from_formula(formula, mass_density, add_baseline=True):
@@ -60,16 +60,16 @@ def dielectric_correction_from_formula(formula, mass_density, add_baseline=True)
     molar_mass = np.sum([number * element.Element.getBySymbol(e).mass for e, number in element_dict.items()])
     molar_mass *= (u.kilograms / u.dalton)
     molar_mass /= (u.AVOGADRO_CONSTANT_NA * u.mole)
-    
+
     molar_volume = (molar_mass / mass_density)
 
     return 4 * np.pi * alpha / molar_volume
-    
+
 
 def formula_to_element_counts(test):
     pattern = r'([A-Z][a-z]{0,2}\d*)'
     pieces = re.split(pattern, test)
-    print "\ntest=%r pieces=%r" % (test, pieces)
+    print("\ntest=%r pieces=%r" % (test, pieces))
     data = pieces[1::2]
     rubbish = filter(None, pieces[0::2])
     pattern2 = r'([A-Z][a-z]{0,2})'

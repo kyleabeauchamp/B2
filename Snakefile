@@ -9,6 +9,7 @@ EXPERIMENTS = pd.read_csv(INPUT_DIELECTRIC)
 EXPERIMENTS["IDENTIFIER"] = EXPERIMENTS["cas"] + "_" + EXPERIMENTS["Temperature, K"].astype('str')
 EXPERIMENTS = EXPERIMENTS.set_index("IDENTIFIER")
 EXPERIMENTS["MOLECULES"] = MOLECULES_PER_BOX
+EXPERIMENTS = EXPERIMENTS[0:10]  # Just do a couple for testing
 EXPERIMENTS = EXPERIMENTS.T.to_dict()
 
 IDENTIFIERS = list(EXPERIMENTS.keys())
@@ -86,7 +87,6 @@ rule production:
         pdb = "results/equil/{identifier}.pdb",
     output:
         dcd = "results/production/{identifier}.dcd",
-        pdb = "results/production/{identifier}.pdb",
         csv = "results/production/{identifier}.csv",
     shell:
         "code/lbrun.py production "
@@ -117,17 +117,17 @@ rule generate_prediction:
     input:
         prmtop = "results/tleap/{identifier}.prmtop",
         dcd = "results/production/{identifier}.dcd",
-        pdb = "results/production/{identifier}.pdb",
+        pdb = "results/equil/{identifier}.pdb",
         csv = "results/production/{identifier}.csv",
     output:
         csv = "results/tables/predictions/{identifier}.csv",
     shell:
-        "code/munge_output_amber.py predict"
+        "code/munge_output_amber.py predict "
         "--in_prmtop={input.prmtop} "
         "--in_csv={input.csv} "
         "--in_dcd={input.dcd} "
         "--out_csv={output.csv} "
-        "--cas=\"{params.cas}\" "
+        "--cas=\"'{params.cas}'\" "  # NB: need extra quotes in fire!
         "--temperature {params.temperature};"
 
 
@@ -136,9 +136,11 @@ rule merge_predictions:
         csv = expand("results/tables/predictions/{identifier}.csv", identifier=IDENTIFIERS),
     output:
         csv = "results/tables/predictions.csv",
+    params:
+        csv = ",".join(expand("results/tables/predictions/{identifier}.csv", identifier=IDENTIFIERS)),
     shell:
-        "code/munge_output_amber.py merge"
-        "--incsv={input.csv} --outcsv={output.csv};"
+        "code/munge_output_amber.py merge "
+        "--incsv='{params.csv}' --outcsv={output.csv};"
 
 
 rule plot_tbv:

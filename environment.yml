@@ -13,5 +13,7 @@ dependencies:
   - mdtraj
   - parmed
   - packmol
+  - scikit-learn
   - pip:
     - fire
+    - arch
