@@ -1,5 +1,5 @@
 """Extract druglike liquid density and dielectric data from ThermoML.
-Also counts the number of measurements remaining 
+Also counts the number of measurements remaining
 """
 import pandas as pd
 from thermopyl import thermoml_lib, cirpy
@@ -48,7 +48,7 @@ counts_data["2.  Heavy Atoms"] = X.count()[experiments]
 X["smiles"] = X.components.apply(lambda x: cirpy.resolve(x, "smiles"))  # This should be cached via sklearn.
 X = X[X.smiles != None]
 X = X.ix[X.smiles.dropna().index]
-    
+
 X["cas"] = X.components.apply(lambda x: thermoml_lib.get_first_entry(cirpy.resolve(x, "cas")))  # This should be cached via sklearn.
 X = X[X.cas != None]
 X = X.ix[X.cas.dropna().index]
@@ -80,8 +80,8 @@ X.dropna(axis=1, how='all', inplace=True)
 
 
 
-X["Pressure, kPa"] = 101.325  # Assume everything within range is comparable.  
-X["Temperature, K"] = X["Temperature, K"].apply(lambda x: np.round(x, 1))  # Round at the 0.1 digit.  
+X["Pressure, kPa"] = 101.325  # Assume everything within range is comparable.
+X["Temperature, K"] = X["Temperature, K"].apply(lambda x: np.round(x, 1))  # Round at the 0.1 digit.
 
 X.to_csv("./tables/full_filtered_data.csv")
 
@@ -98,4 +98,4 @@ q.to_csv("./tables/data_dielectric.csv")
 
 counts_data.ix["7.  Density+Dielectric"] = len(q)
 
-print counts_data.to_latex()
+print(counts_data.to_latex())
