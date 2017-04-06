@@ -2,7 +2,9 @@
 Also counts the number of measurements remaining
 """
 import pandas as pd
+import numpy as np
 from thermopyl import thermoml_lib, cirpy
+from functools import reduce
 
 data = pd.read_hdf("./data.h5", 'data')
 
@@ -12,7 +14,7 @@ data = data[~data.filename.isin(bad_filenames)]
 experiments = ["Mass density, kg/m3", "Relative permittivity at zero frequency"]
 
 ind_list = [data[exp].dropna().index for exp in experiments]
-ind = reduce(lambda x,y: x.union(y), ind_list)
+ind = reduce(lambda x, y: x.union(y), ind_list)
 X = data.ix[ind]
 
 name_to_formula = pd.read_hdf("./compound_name_to_formula.h5", 'data')
