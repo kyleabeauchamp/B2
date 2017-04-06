@@ -1,6 +1,8 @@
 # B2: better benchmarking
 
-1.  Install requirements (not 100% working yet, possible issues with packmol gfort and openmm etc.)  Needs py3k FYI.
+NOTE: this pipeline is a work in progress and hasn't undergone much testing!
+
+1.  Install requirements (not 100% automated due to issues with packmol gfort and openmm etc.)  Needs py3k FYI.
 
 ```bash
 conda env create -f environment.yml
@@ -25,5 +27,5 @@ snakemake -np
 snakemake -p
 ```
 
-Cluster mode is also available via, e.g., `snakemake --cluster="qsub ......"`
+Cluster based parallelization is also available via, e.g., `snakemake --cluster="qsub ......"`
 The details of the pipeline are the rules in `Snakefile`.
