@@ -28,7 +28,7 @@ def predict(in_prmtop, in_csv, in_dcd, out_csv, cas, temperature):
     prmtop = parmed.load_file(in_prmtop)
     charges = prmtop.to_dataframe().charge.values
     temperature = float(temperature)
-    traj = traj[t0 * len(traj) / len(rho):]
+    traj = traj[t0 * len(traj) // len(rho):]
     dielectric = md.geometry.static_dielectric(traj, charges, temperature)
     dielectric_sigma_fixedblock = dipole_errorbars.bootstrap_old(traj, charges, temperature, fixed_block_length)[1]
     block_length = dipole_errorbars.find_block_size(traj, charges, temperature)

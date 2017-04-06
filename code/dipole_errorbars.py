@@ -11,21 +11,20 @@ gas_constant = 8.3144621 * u.joule / u.kelvin / u.mole
 def dipole_moment_errorbars():
     """Modified from mdtraj.geometry.static_dielectic()."""
     moments = md.geometry.dipole_moments(traj, charges)
-    
+
     mu = moments.mean(0)  # Mean over frames
-    
+
     subtracted = moments - mu
-    
+
     dipole_variance = (subtracted * subtracted).sum(-1).mean(0) * (u.elementary_charge * u.nanometers) ** 2.  # <M*M> - <M>*<M> = <(M - <M>) * (M - <M>)>
 
     volume = traj.unitcell_volumes.mean() * u.nanometers ** 3.  # Average box volume of trajectory
-    
-    static_dielectric_sigma = dipole_variance / (3 * kB * temperature * volume * epsilon0)  # Eq. 7 of Derivation of an improved simple point charge model for liquid water: SPC/A and SPC/L 
 
+    static_dielectric_sigma = dipole_variance / (3 * kB * temperature * volume * epsilon0)  # Eq. 7 of Derivation of an improved simple point charge model for liquid water: SPC/A and SPC/L
 
 
 def bootstrap_old(traj, charges, temperature, block_length):
-    n = traj.n_frames / block_length
+    n = traj.n_frames // block_length
     indices = np.array_split(np.arange(traj.n_frames), n)
     epsilon = np.zeros(n)
     for k, ind in enumerate(indices):
@@ -39,7 +38,7 @@ def find_block_size(traj, charges, temperature, num_block_sizes_to_try=12, num_b
     block_size_grid = np.unique(block_size_grid)  # The float -> int conversion sometimes leads to duplicate values, so avoid this
     epsilon_grid = np.array([bootstrap(traj, charges, temperature, block_length, num_bootstrap) for block_length in block_size_grid])
     return block_size_grid[epsilon_grid.argmax()]
-    
+
 def bootstrap(traj, charges, temperature, block_length, num_bootstrap):
     bootstrap = arch.bootstrap.CircularBlockBootstrap(block_length, traj=traj)
 
@@ -49,4 +48,3 @@ def bootstrap(traj, charges, temperature, block_length, num_bootstrap):
     results = bootstrap.apply(bootstrap_func, num_bootstrap)
     epsilon_err = results.std()
     return epsilon_err
-
