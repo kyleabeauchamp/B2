@@ -1,6 +1,7 @@
 from simtk.openmm import app
 import simtk.openmm as mm
 from simtk import unit as u
+from density_simulation_parameters import CUTOFF
 import parmed
 
 
@@ -34,10 +35,8 @@ inconsistent ligand residue names in your box, mol2, and frcmod files.
 You can use mdtraj to edit the residue names with something like
 this: trj.top.residue(0).name = "L1"
 """
-    # DLM: Need to fix imports here for me
-    #from smarty import XYZ
-    from openeye.oechem import oechem
-
+    from openeye import oechem
+    from openforcefield.typing.engines.smirnoff import ForceField
 
     # Read in molecules
     oemols = []
@@ -50,7 +49,6 @@ this: trj.top.residue(0).name = "L1"
         oechem.OETriposAtomNames(mol)
         oemols.append(mol)
 
-
     # Read in PDB file to get topology
     pdb = app.PDBFile(box_filename)
 
@@ -58,10 +56,10 @@ this: trj.top.residue(0).name = "L1"
     ff = ForceField(ffxml)
 
     # Construct system; charging not needed as mol2 files already have charges here
-    system = ff.createSystem( pdb.topology, oemols, nonbondedMethod = PME, nonbondedCutoff = CUTOFF )
+    system = ff.createSystem(pdb.topology, oemols, nonbondedMethod=app.PME, nonbondedCutoff=CUTOFF)
 
     # Dump to AMBER format
-    structure = parmed.openmm.topsystem.load_topology( pdb.topology, system, pdb.positions)
+    structure = parmed.openmm.topsystem.load_topology(pdb.topology, system, pdb.positions)
     structure.save(prmtop_filename, overwrite=True)
     structure.save(inpcrd_filename, format='rst7', overwrite=True)
 

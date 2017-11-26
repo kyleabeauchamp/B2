@@ -19,8 +19,8 @@ EXPERIMENTS = {key: val for key, val in EXPERIMENTS.items() if key not in BLACKL
 IDENTIFIERS = list(EXPERIMENTS.keys())
 ALL_CAS = {v["cas"] for k, v in EXPERIMENTS.items()}
 
-FFXML = None  # Use this for GAFF
-#FFXML = "smirff99Frosst.ffxml"  # Use this line for smirff
+#FFXML = None  # Use this for GAFF
+FFXML = "forcefield/smirnoff99Frosst.ffxml"  # Use this line for smirff
 
 rule all:
     input:
@@ -51,7 +51,7 @@ rule build_box:
     params:
         cas = lambda wildcards: EXPERIMENTS[wildcards.identifier]["cas"],
         molecules = lambda wildcards: EXPERIMENTS[wildcards.identifier]["MOLECULES"],
-        ff_flag = lambda wildcards: ("--ffxml={FFXML}" if FFXML is not None else ""),
+        ff_flag = lambda wildcards: ("--ffxml=%s" % FFXML if FFXML is not None else ""),
     input:
         mol2 = lambda wildcards: "results/monomers/{cas}.mol2".format(cas=EXPERIMENTS[wildcards.identifier]["cas"]),
         frcmod = lambda wildcards: "results/monomers/{cas}.frcmod".format(cas=EXPERIMENTS[wildcards.identifier]["cas"]),

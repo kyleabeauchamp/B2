@@ -16,6 +16,7 @@ conda env create -f environment.yml
 source activate benchmark
 pip install -i https://pypi.anaconda.org/OpenEye/simple OpenEye-toolkits
 # Depending on your system, you may need to do some other manual installations at this point.
+# In particular, I ended up having to manually delete openmm and manually build :(
 ```
 
 2.  Activate environment and export environment variables:
