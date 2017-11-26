@@ -74,8 +74,8 @@ rule equilibrate:
     params:
         temperature = lambda wildcards: EXPERIMENTS[wildcards.identifier]["Temperature, K"],
     input:
-        prmtop = "results/tleap/{identifier}.prmtop",
-        inpcrd = "results/tleap/{identifier}.inpcrd",
+        prmtop = rules.build_box.output.prmtop,
+        inpcrd = rules.build_box.output.inpcrd,
     output:
         dcd = "results/equil/{identifier}.dcd",
         pdb = "results/equil/{identifier}.pdb",
@@ -92,8 +92,8 @@ rule production:
     params:
         temperature = lambda wildcards: EXPERIMENTS[wildcards.identifier]["Temperature, K"],
     input:
-        prmtop = "results/tleap/{identifier}.prmtop",
-        pdb = "results/equil/{identifier}.pdb",
+        prmtop = rules.build_box.output.prmtop,
+        pdb = rules.equilibrate.output.pdb,
     output:
         dcd = "results/production/{identifier}.dcd",
         csv = "results/production/{identifier}.csv",
@@ -124,10 +124,10 @@ rule generate_prediction:
         cas = lambda wildcards: EXPERIMENTS[wildcards.identifier]["cas"],
         temperature = lambda wildcards: EXPERIMENTS[wildcards.identifier]["Temperature, K"],
     input:
-        prmtop = "results/tleap/{identifier}.prmtop",
-        dcd = "results/production/{identifier}.dcd",
-        pdb = "results/equil/{identifier}.pdb",
-        csv = "results/production/{identifier}.csv",
+        prmtop = rules.build_box.output.prmtop,
+        dcd = rules.production.output.dcd,
+        pdb = rules.equilibrate.output.pdb,
+        csv = rules.production.output.csv,
     output:
         csv = "results/tables/predictions/{identifier}.csv",
     shell:
@@ -154,8 +154,8 @@ rule merge_predictions:
 
 rule plot_tbv:
     input:
-        pred_csv = "results/tables/predictions.csv",
-        data_with_metadata = "results/tables/data_with_metadata.csv",
+        pred_csv = rules.merge_predictions.output.csv,
+        data_with_metadata = rules.build_si_table.output.outcsv,
     output:
         dens_pdf = "results/figures/densities_thermoml.pdf",
         diff_pdf = "results/figures/densities_differences_thermoml.pdf",
