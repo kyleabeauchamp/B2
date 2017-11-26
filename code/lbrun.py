@@ -38,7 +38,7 @@ def build_box(in_mol2, in_frcmod, out_pdb, n_monomers, out_inpcrd, out_prmtop, f
     if ffxml is None:
         tleap_cmd = openmoltools.amber.build_mixture_prmtop(gaff_mol2_filenames, frcmod_filenames, out_pdb, out_prmtop, out_inpcrd)
     else:
-        tleap_cmd = smirnoffmixture.build_mixture_prmtop(gaff_mol2_filenames, frcmod_filenames, out_pdb, out_prmtop, out_inpcrd, ffxml=ffxml)
+        tleap_cmd = smirnoffmixture.build_mixture_prmtop(gaff_mol2_filenames, out_pdb, out_prmtop, out_inpcrd, ffxml=ffxml)
 
 
 def equilibrate(in_prmtop, in_inpcrd, out_dcd, out_pdb, temperature):
