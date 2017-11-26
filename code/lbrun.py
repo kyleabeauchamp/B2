@@ -7,6 +7,7 @@ import simtk.openmm as mm
 from simtk import unit as u
 
 import openmoltools
+import smirnoffmixture
 from density_simulation_parameters import (EQUIL_FRICTION, EQUIL_TIMESTEP, PRESSURE, BAROSTAT_FREQUENCY,
                                            CUTOFF, STD_ERROR_TOLERANCE, N_STEPS, OUTPUT_DATA_FREQUENCY,
                                            OUTPUT_FREQUENCY, FRICTION, TIMESTEP, OUTPUT_FREQUENCY_EQUIL, N_EQUIL_STEPS)
@@ -23,7 +24,7 @@ def build_monomer(cas, mol2_filename, frcmod_filename):
     openmoltools.openeye.smiles_to_antechamber(smiles_string, mol2_filename, frcmod_filename)
 
 
-def build_box(in_mol2, in_frcmod, out_pdb, n_monomers, out_inpcrd, out_prmtop):
+def build_box(in_mol2, in_frcmod, out_pdb, n_monomers, out_inpcrd, out_prmtop, ffxml=None):
     """Build an initial box with packmol and use it to generate AMBER files."""
     # NB: I removed the mixure support here for simplicity.
     gaff_mol2_filenames = [in_mol2]
@@ -34,7 +35,10 @@ def build_box(in_mol2, in_frcmod, out_pdb, n_monomers, out_inpcrd, out_prmtop):
     packed_trj = openmoltools.packmol.pack_box([md.load(mol2) for mol2 in gaff_mol2_filenames], n_monomers)
     packed_trj.save(out_pdb)
 
-    tleap_cmd = openmoltools.amber.build_mixture_prmtop(gaff_mol2_filenames, frcmod_filenames, out_pdb, out_prmtop, out_inpcrd)
+    if ffxml is None:
+        tleap_cmd = openmoltools.amber.build_mixture_prmtop(gaff_mol2_filenames, frcmod_filenames, out_pdb, out_prmtop, out_inpcrd)
+    else:
+        tleap_cmd = smirnoffmixture.build_mixture_prmtop(gaff_mol2_filenames, frcmod_filenames, out_pdb, out_prmtop, out_inpcrd, ffxml=ffxml)
 
 
 def equilibrate(in_prmtop, in_inpcrd, out_dcd, out_pdb, temperature):
