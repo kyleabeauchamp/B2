@@ -4,7 +4,7 @@ This file contains all simulation parameters used in this project.
 from simtk import unit as u
 
 
-MOLECULES_PER_BOX = 1000
+MOLECULES_PER_BOX = 500  # smirnoff eats up 16GB of RAM with 1,000 molecules
 
 CUTOFF = 0.95 * u.nanometers
 

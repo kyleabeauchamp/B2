@@ -5,7 +5,7 @@ from density_simulation_parameters import CUTOFF
 import parmed
 
 
-def build_mixture_prmtop(self, gaff_mol2_filenames, box_filename, prmtop_filename, inpcrd_filename, ffxml):
+def build_mixture_prmtop(gaff_mol2_filenames, box_filename, prmtop_filename, inpcrd_filename, ffxml):
     """Analog of openmoltools.amber.build_mixture_prmtop which uses SMIRNOFF forcefield (from github.com/open-forcefield-group/smarty) to parameterize small molecules, rather than GAFF.
 
 Parameters
@@ -36,7 +36,8 @@ You can use mdtraj to edit the residue names with something like
 this: trj.top.residue(0).name = "L1"
 """
     from openeye import oechem
-    from openforcefield.typing.engines.smirnoff import ForceField
+    from openforcefield.typing.engines.smirnoff import ForceField, PME
+    from openforcefield.utils import read_molecules, get_data_filename, generateTopologyFromOEMol
 
     # Read in molecules
     oemols = []
@@ -56,7 +57,7 @@ this: trj.top.residue(0).name = "L1"
     ff = ForceField(ffxml)
 
     # Construct system; charging not needed as mol2 files already have charges here
-    system = ff.createSystem(pdb.topology, oemols, nonbondedMethod=app.PME, nonbondedCutoff=CUTOFF)
+    system = ff.createSystem(pdb.topology, oemols, nonbondedMethod=PME, nonbondedCutoff=CUTOFF)
 
     # Dump to AMBER format
     structure = parmed.openmm.topsystem.load_topology(pdb.topology, system, pdb.positions)
