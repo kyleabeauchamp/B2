@@ -9,7 +9,7 @@ EXPERIMENTS = pd.read_csv(INPUT_DIELECTRIC)
 EXPERIMENTS["IDENTIFIER"] = EXPERIMENTS["cas"] + "_" + EXPERIMENTS["Temperature, K"].astype('str')
 EXPERIMENTS = EXPERIMENTS.set_index("IDENTIFIER")
 EXPERIMENTS["MOLECULES"] = MOLECULES_PER_BOX
-EXPERIMENTS = EXPERIMENTS[:]  # Just do a couple for testing
+EXPERIMENTS = EXPERIMENTS[0:5]  # Just do a couple for testing
 EXPERIMENTS = EXPERIMENTS.T.to_dict()
 
 BLACKLIST = {"126068-67-5_313.2", "126068-67-5_303.2", "110-97-4_313.2", "118662-30-9 298.2", "118662-30-9_298.2", "118662-30-9_293.2", "105-59-9_318.2", "105-59-9_293.2",
@@ -38,13 +38,13 @@ rule all:
 
 rule build_monomer:
     output:
-        pdb = "results/monomers/{cas}.pdb",
         mol2 = "results/monomers/{cas}.mol2",
         frcmod = "results/monomers/{cas}.frcmod",
     shell:
         "code/lbrun.py build_monomer "
-        "--cas=\"'{wildcards.cas}'\" "  # NB: need extra quotes in fire!
-        "--pdb={output.pdb} --mol2={output.mol2} --frcmod={output.frcmod};"
+        "\"'{wildcards.cas}'\" "  # NB: need extra quotes in fire to not try to cast CAS string as integers
+        "{output.mol2} "
+        "{output.frcmod} ;"
 
 
 rule build_box:

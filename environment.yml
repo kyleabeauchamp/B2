@@ -13,6 +13,7 @@ dependencies:
   - mdtraj
   - parmed
   - packmol
+  - jupyter
   - scikit-learn
   - pip:
     - fire
