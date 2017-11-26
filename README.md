@@ -13,6 +13,9 @@ bash Miniconda3-latest-Linux-x86_64.sh
 
 ```bash
 conda env create -f environment.yml
+source activate benchmark
+pip install -i https://pypi.anaconda.org/OpenEye/simple OpenEye-toolkits
+# Depending on your system, you may need to do some other manual installations at this point.
 ```
 
 2.  Activate environment and export environment variables:
