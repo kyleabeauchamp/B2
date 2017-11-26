@@ -1,10 +1,10 @@
-name: py35
+name: benchmark
 channels:
   - conda-forge
   - bioconda
   - omnia
 dependencies:
-  - python=3.5
+  - python=3.6
   - pandas  # TODO: add min. or exact versions!
   - snakemake
   - openmm
@@ -17,3 +17,4 @@ dependencies:
   - pip:
     - fire
     - arch
+    - https://github.com/openforcefield/openforcefield/archive/0.0.3.zip
