@@ -41,7 +41,7 @@ this: trj.top.residue(0).name = "L1"
 
     # Read in molecules
     oemols = []
-    for mol2file in gaff_mol2_filenames:
+    for mol2file in set(gaff_mol2_filenames):
         mol = oechem.OEGraphMol()
         ifs = oechem.oemolistream(mol2file)
         flavor = oechem.OEIFlavor_Generic_Default | oechem.OEIFlavor_MOL2_Default | oechem.OEIFlavor_MOL2_Forcefield
