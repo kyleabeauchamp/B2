@@ -24,11 +24,13 @@ def build_monomer(cas, mol2_filename, frcmod_filename):
     openmoltools.openeye.smiles_to_antechamber(smiles_string, mol2_filename, frcmod_filename)
 
 
-def build_box(in_mol2, in_frcmod, out_pdb, n_monomers, out_inpcrd, out_prmtop, ffxml=None):
+def build_box(in_mol2, in_frcmod, out_pdb, n_monomers, out_top, out_gro, ffxml=None):
     """Build an initial box with packmol and use it to generate AMBER files."""
     # NB: I removed the mixure support here for simplicity.
     gaff_mol2_filenames = [in_mol2]
     frcmod_filenames = [in_frcmod]
+    out_prmtop = out_top.replace('.top', '.prmtop')
+    out_inpcrd = out_top.replace('.top', '.inpcrd')
     n_monomers = [n_monomers]
     print(gaff_mol2_filenames)
     print(n_monomers)
@@ -37,22 +39,23 @@ def build_box(in_mol2, in_frcmod, out_pdb, n_monomers, out_inpcrd, out_prmtop, f
 
     if ffxml is None:
         tleap_cmd = openmoltools.amber.build_mixture_prmtop(gaff_mol2_filenames, frcmod_filenames, out_pdb, out_prmtop, out_inpcrd)
+        openmoltools.utils.amber_to_gromacs('TMP', out_prmtop, out_inpcrd, out_top = out_top, out_gro = out_gro )
     else:
-        tleap_cmd = smirnoffmixture.build_mixture_prmtop(gaff_mol2_filenames, out_pdb, out_prmtop, out_inpcrd, ffxml=ffxml)
+        tleap_cmd = smirnoffmixture.build_mixture_prmtop(gaff_mol2_filenames, out_pdb, out_top, out_gro, ffxml=ffxml)
 
 
-def equilibrate(in_prmtop, in_inpcrd, out_dcd, out_pdb, temperature):
+def equilibrate(in_top, in_gro, out_dcd, out_pdb, temperature):
     temperature = temperature * u.kelvin  # TODO: recycle John's simtk.unit parser
 
-    prmtop = app.AmberPrmtopFile(in_prmtop)
-    inpcrd = app.AmberInpcrdFile(in_inpcrd)
+    gro = app.GromacsGroFile(in_gro)
+    top = app.GromacsTopFile(in_top, unitCellDimensions=gro.getUnitCellDimensions() )
 
-    system = prmtop.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=CUTOFF, constraints=app.HBonds)
+    system = top.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=CUTOFF, constraints=app.HBonds)
     integrator = mm.LangevinIntegrator(temperature, EQUIL_FRICTION, EQUIL_TIMESTEP)
     system.addForce(mm.MonteCarloBarostat(PRESSURE, temperature, BAROSTAT_FREQUENCY))
 
-    simulation = app.Simulation(prmtop.topology, system, integrator)
-    simulation.context.setPositions(inpcrd.positions)
+    simulation = app.Simulation(top.topology, system, integrator)
+    simulation.context.setPositions(gro.positions)
 
     state = simulation.context.getState(getEnergy=True)
     print(state.getPotentialEnergy())
@@ -77,8 +80,10 @@ def equilibrate(in_prmtop, in_inpcrd, out_dcd, out_pdb, temperature):
 def production(in_prmtop, in_pdb, out_dcd, out_csv, temperature):
     temperature = temperature * u.kelvin  # TODO: recycle John's simtk.unit parser
 
-    prmtop = app.AmberPrmtopFile(in_prmtop)
     pdb = app.PDBFile(in_pdb)
+
+    top = app.GromacsTopFile(in_top, unitCellDimensions=gro.getUnitCellDimensions() )
+    top.topology.setPeriodicBoxVectors(pdb.topology.getPeriodicBoxVectors() )
 
     system = prmtop.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=CUTOFF, constraints=app.HBonds)
 

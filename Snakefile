@@ -57,15 +57,15 @@ rule build_box:
         frcmod = lambda wildcards: "results/monomers/{cas}.frcmod".format(cas=EXPERIMENTS[wildcards.identifier]["cas"]),
     output:
         pdb = "results/packmol_boxes/{identifier}.pdb",
-        prmtop = "results/tleap/{identifier}.prmtop",
-        inpcrd = "results/tleap/{identifier}.inpcrd",
+        top = "results/tleap/{identifier}.top",
+        gro = "results/tleap/{identifier}.gro",
     shell:
         "code/lbrun.py build_box "
         "--in_mol2={input.mol2} "
         "--in_frcmod={input.frcmod} "
         "--out_pdb={output.pdb} "
-        "--out_inpcrd={output.inpcrd} "
-        "--out_prmtop={output.prmtop} "
+        "--out_gro={output.gro} "
+        "--out_top={output.top} "
         "--n_monomers={params.molecules} "
         "{params.ff_flag};"
 
@@ -74,15 +74,15 @@ rule equilibrate:
     params:
         temperature = lambda wildcards: EXPERIMENTS[wildcards.identifier]["Temperature, K"],
     input:
-        prmtop = rules.build_box.output.prmtop,
-        inpcrd = rules.build_box.output.inpcrd,
+        top = rules.build_box.output.top,
+        gro = rules.build_box.output.gro,
     output:
         dcd = "results/equil/{identifier}.dcd",
         pdb = "results/equil/{identifier}.pdb",
     shell:
         "code/lbrun.py equilibrate "
-        "--in_prmtop={input.prmtop} "
-        "--in_inpcrd={input.inpcrd} "
+        "--in_top={input.top} "
+        "--in_gro={input.gro} "
         "--out_dcd={output.dcd} "
         "--out_pdb={output.pdb} "
         "--temperature={params.temperature};"
@@ -92,14 +92,14 @@ rule production:
     params:
         temperature = lambda wildcards: EXPERIMENTS[wildcards.identifier]["Temperature, K"],
     input:
-        prmtop = rules.build_box.output.prmtop,
+        top = rules.build_box.output.top,
         pdb = rules.equilibrate.output.pdb,
     output:
         dcd = "results/production/{identifier}.dcd",
         csv = "results/production/{identifier}.csv",
     shell:
         "code/lbrun.py production "
-        "--in_prmtop {input.prmtop} "
+        "--in_top {input.top} "
         "--in_pdb {input.pdb} "
         "--out_dcd {output.dcd} "
         "--out_csv {output.csv} "
@@ -124,15 +124,15 @@ rule generate_prediction:
         cas = lambda wildcards: EXPERIMENTS[wildcards.identifier]["cas"],
         temperature = lambda wildcards: EXPERIMENTS[wildcards.identifier]["Temperature, K"],
     input:
-        prmtop = rules.build_box.output.prmtop,
+        top = rules.build_box.output.top,
         dcd = rules.production.output.dcd,
         pdb = rules.equilibrate.output.pdb,
         csv = rules.production.output.csv,
     output:
         csv = "results/tables/predictions/{identifier}.csv",
     shell:
-        "code/munge_output_amber.py predict "
-        "--in_prmtop={input.prmtop} "
+        "code/munge_output_gromacs.py predict "
+        "--in_top={input.top} "
         "--in_csv={input.csv} "
         "--in_dcd={input.dcd} "
         "--out_csv={output.csv} "
@@ -148,7 +148,7 @@ rule merge_predictions:
     params:
         csv = ",".join(expand("results/tables/predictions/{identifier}.csv", identifier=IDENTIFIERS)),
     shell:
-        "code/munge_output_amber.py merge "
+        "code/munge_output_gromacs.py merge "
         "--incsv='{params.csv}' --outcsv={output.csv};"
 
 
