@@ -73,7 +73,7 @@ def equilibrate(in_top, in_gro, out_dcd, out_pdb, temperature):
     simulation.step(N_EQUIL_STEPS)
 
     # Re-write a better PDB with correct box sizes.
-    traj = md.load(out_dcd, top=in_top)[-1]
+    traj = md.load(out_dcd, top=in_gro)[-1]
     traj.save(out_pdb)
 
 
