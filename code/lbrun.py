@@ -73,11 +73,11 @@ def equilibrate(in_top, in_gro, out_dcd, out_pdb, temperature):
     simulation.step(N_EQUIL_STEPS)
 
     # Re-write a better PDB with correct box sizes.
-    traj = md.load(out_dcd, top=in_prmtop)[-1]
+    traj = md.load(out_dcd, top=in_top)[-1]
     traj.save(out_pdb)
 
 
-def production(in_prmtop, in_pdb, out_dcd, out_csv, temperature):
+def production(in_top, in_pdb, out_dcd, out_csv, temperature):
     temperature = temperature * u.kelvin  # TODO: recycle John's simtk.unit parser
 
     pdb = app.PDBFile(in_pdb)
@@ -85,12 +85,12 @@ def production(in_prmtop, in_pdb, out_dcd, out_csv, temperature):
     top = app.GromacsTopFile(in_top, unitCellDimensions=gro.getUnitCellDimensions() )
     top.topology.setPeriodicBoxVectors(pdb.topology.getPeriodicBoxVectors() )
 
-    system = prmtop.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=CUTOFF, constraints=app.HBonds)
+    system = top.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=CUTOFF, constraints=app.HBonds)
 
     integrator = mm.LangevinIntegrator(temperature, FRICTION, TIMESTEP)
     system.addForce(mm.MonteCarloBarostat(PRESSURE, temperature, BAROSTAT_FREQUENCY))
 
-    simulation = app.Simulation(prmtop.topology, system, integrator)
+    simulation = app.Simulation(top.topology, system, integrator)
 
     simulation.context.setPositions(pdb.positions)
     simulation.context.setPeriodicBoxVectors(*pdb.topology.getPeriodicBoxVectors())
