@@ -133,6 +133,7 @@ rule generate_prediction:
     shell:
         "code/munge_output_gromacs.py predict "
         "--in_top={input.top} "
+        "--in_pdb {input.pdb} "
         "--in_csv={input.csv} "
         "--in_dcd={input.dcd} "
         "--out_csv={output.csv} "

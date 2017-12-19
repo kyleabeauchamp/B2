@@ -82,7 +82,7 @@ def production(in_top, in_pdb, out_dcd, out_csv, temperature):
 
     pdb = app.PDBFile(in_pdb)
 
-    top = app.GromacsTopFile(in_top, unitCellDimensions=gro.getUnitCellDimensions() )
+    top = app.GromacsTopFile(in_top )
     top.topology.setPeriodicBoxVectors(pdb.topology.getPeriodicBoxVectors() )
 
     system = top.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=CUTOFF, constraints=app.HBonds)

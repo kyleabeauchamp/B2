@@ -93,3 +93,6 @@ results
 
 # Snakemake stuff
 .snakemake
+
+#Mac stuff
+.DS_Store
