@@ -16,6 +16,7 @@ dependencies:
   - jupyter
   - scikit-learn
   - lxml
+  - cython
   - networkx  # Needed because openforcefield is installed via pip
   - pip:
     - fire

@@ -8,13 +8,13 @@ import dipole_errorbars
 import fire
 
 
-def predict(in_prmtop, in_csv, in_dcd, out_csv, cas, temperature):
+def predict(in_top, in_pdb, in_csv, in_dcd, out_csv, cas, temperature):
     num_bootstrap = 100
     fixed_block_length = 20  # 200 ps blocks for dielectric error bar block averaging.
 
     print(cas, temperature)
 
-    traj = md.load(in_dcd, top=in_prmtop)
+    traj = md.load(in_dcd, top=in_pdb)
 
     if traj.unitcell_lengths is None:
         raise(ValueError("No unitcell lengths!"))
@@ -25,8 +25,8 @@ def predict(in_prmtop, in_csv, in_dcd, out_csv, cas, temperature):
     [t0, g, Neff] = pymbar.timeseries.detectEquilibration(rho)
     mu = rho[t0:].mean()
     sigma = rho[t0:].std() * Neff ** -0.5
-    prmtop = parmed.load_file(in_prmtop)
-    charges = prmtop.to_dataframe().charge.values
+    top = parmed.load_file(in_top)
+    charges = top.to_dataframe().charge.values
     temperature = float(temperature)
     traj = traj[t0 * len(traj) // len(rho):]
     dielectric = md.geometry.static_dielectric(traj, charges, temperature)

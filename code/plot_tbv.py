@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import fire
 
-FF_NAME = "SMIRNOFF"
+from density_simulation_parameters import (FF_NAME)
 
 
 def runner(expt_csv, pred_csv, dens_pdf, diff_pdf, diel_pdf, nocorr_pdf):

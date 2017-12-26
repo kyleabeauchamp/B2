@@ -5,7 +5,7 @@ from density_simulation_parameters import CUTOFF
 import parmed
 
 
-def build_mixture_prmtop(gaff_mol2_filenames, box_filename, prmtop_filename, inpcrd_filename, ffxml):
+def build_mixture_prmtop(gaff_mol2_filenames, box_filename, out_top, out_gro, ffxml):
     """Analog of openmoltools.amber.build_mixture_prmtop which uses SMIRNOFF forcefield (from github.com/open-forcefield-group/smarty) to parameterize small molecules, rather than GAFF.
 
 Parameters
@@ -15,10 +15,10 @@ mol2_filenames : list(str)
     ONE solute.
 box_filename : str
     Filename of PDB containing an arbitrary box of the mol2 molecules.
-prmtop_filename : str
-    output prmtop filename.  Should have suffix .prmtop
-inpcrd_filename : str
-    output inpcrd filename.  Should have suffix .inpcrd
+out_top : str
+    output GROMACS topology filename.  Should have suffix .top
+out_gro : str
+    output gro filename.  Should have suffix .gro
 ffxml : str
     filename containing input SMIRNOFF FFXML file for use in parameterizing the system
 
@@ -41,7 +41,7 @@ this: trj.top.residue(0).name = "L1"
 
     # Read in molecules
     oemols = []
-    for mol2file in gaff_mol2_filenames:
+    for mol2file in set(gaff_mol2_filenames):
         mol = oechem.OEGraphMol()
         ifs = oechem.oemolistream(mol2file)
         flavor = oechem.OEIFlavor_Generic_Default | oechem.OEIFlavor_MOL2_Default | oechem.OEIFlavor_MOL2_Forcefield
@@ -61,7 +61,7 @@ this: trj.top.residue(0).name = "L1"
 
     # Dump to AMBER format
     structure = parmed.openmm.topsystem.load_topology(pdb.topology, system, pdb.positions)
-    structure.save(prmtop_filename, overwrite=True)
-    structure.save(inpcrd_filename, format='rst7', overwrite=True)
+    structure.save(out_top, overwrite=True)
+    structure.save(out_gro, overwrite=True)
 
     return True
